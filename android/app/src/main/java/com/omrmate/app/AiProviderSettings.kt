@@ -24,10 +24,14 @@ fun AiProviderSettings(onAnswerKeyPhoto: (Uri) -> Unit = {}) {
     var endpoint by remember { mutableStateOf(prefs.getString("endpoint", "") ?: "") }
     var apiKey by remember { mutableStateOf(prefs.getString("api_key", "") ?: "") }
     var expanded by remember { mutableStateOf(false) }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var studentAnswers by remember { mutableStateOf("") }
+    var result by remember { mutableStateOf("") }
+    var checking by remember { mutableStateOf(false) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let(onAnswerKeyPhoto)
+        imageUri = uri
+        if (uri != null) onAnswerKeyPhoto(uri)
     }
-
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -40,33 +44,46 @@ fun AiProviderSettings(onAnswerKeyPhoto: (Uri) -> Unit = {}) {
             }
         }
         ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
-            OutlinedTextField(
-                value = provider, onValueChange = {}, readOnly = true,
-                label = { Text("AI provider") },
+            OutlinedTextField(value = provider, onValueChange = {}, readOnly = true, label = { Text("AI provider") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                modifier = Modifier.menuAnchor().fillMaxWidth()
-            )
+                modifier = Modifier.menuAnchor().fillMaxWidth())
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 listOf("Gemini", "Groq", "OpenAI", "Custom OpenAI-compatible API").forEach { item ->
                     DropdownMenuItem(text = { Text(item) }, onClick = { provider = item; expanded = false })
                 }
             }
         }
-        OutlinedTextField(value = model, onValueChange = { model = it }, label = { Text("Model ID") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = model, onValueChange = { model = it }, label = { Text("Model ID (optional)") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(value = endpoint, onValueChange = { endpoint = it }, label = { Text("Custom endpoint (optional)") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = apiKey, onValueChange = { apiKey = it }, label = { Text("API key") }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
-        Button(
-            onClick = {
-                prefs.edit().putString("language", language).putString("provider", provider)
-                    .putString("model", model.trim()).putString("endpoint", endpoint.trim())
-                    .putString("api_key", apiKey.trim()).apply()
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Save settings") }
+        OutlinedTextField(value = apiKey, onValueChange = { apiKey = it }, label = { Text("API key") },
+            visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
+        Button(onClick = {
+            prefs.edit().putString("language", language).putString("provider", provider)
+                .putString("model", model.trim()).putString("endpoint", endpoint.trim())
+                .putString("api_key", apiKey.trim()).apply()
+            result = "Settings saved on this device."
+        }, modifier = Modifier.fillMaxWidth()) { Text("Save settings") }
+        Divider()
+        Text("Check OMR against official answer key", style = MaterialTheme.typography.titleMedium)
         OutlinedButton(onClick = { picker.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
-            Text("Upload answer-key photo")
+            Text(if (imageUri == null) "Upload official answer-key photo" else "Change answer-key photo")
         }
-        Text("Copy question-numbered OMR answers, including blanks, into your preferred AI chat with the official answer key. No question text is needed.")
-        Text("Photo selection is available; OCR and live AI scoring are not yet connected.", style = MaterialTheme.typography.bodySmall)
+        OutlinedTextField(value = studentAnswers, onValueChange = { studentAnswers = it },
+            label = { Text("Your answers, e.g. 1-A, 2-C, 3-blank") },
+            minLines = 4, modifier = Modifier.fillMaxWidth())
+        Button(enabled = imageUri != null && studentAnswers.isNotBlank() && !checking,
+            onClick = {
+                val uri = imageUri ?: return@Button
+                checking = true
+                result = "Reading answer key and contacting provider&"
+                AnswerKeyAi.check(context, uri, studentAnswers, provider, model, endpoint, apiKey) { response ->
+                    result = response
+                    checking = false
+                }
+            }, modifier = Modifier.fillMaxWidth()) {
+            Text(if (checking) "Checking&" else "OCR + Check answers")
+        }
+        if (result.isNotBlank()) Text(result, style = MaterialTheme.typography.bodyMedium)
+        Text("OCR runs on-device. AI checking sends OCR text and your entered answers to the selected provider. API keys are stored locally on this device.", style = MaterialTheme.typography.bodySmall)
     }
 }
