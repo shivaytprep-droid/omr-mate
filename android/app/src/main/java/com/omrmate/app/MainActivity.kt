@@ -59,6 +59,7 @@ private fun OMRMate(context: Context) {
                         Text("OMR Mate", color = Navy, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         Text(tr("Offline practice companion", "ऑफ़लाइन अभ्यास साथी"), color = Color.Gray, fontSize = 11.sp)
                     }
+                    TextButton(onClick = { page = "ai" }) { Text("AI Check") }
                     TextButton(onClick = { hindi = !hindi; prefs.edit().putBoolean("hi", hindi).apply() }) {
                         Text(if (hindi) "हिंदी" else "EN / हिंदी")
                     }
@@ -68,6 +69,7 @@ private fun OMRMate(context: Context) {
                 if (page != "test") Row(Modifier.fillMaxWidth().background(Color.White).padding(8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
                     TextButton(onClick = { page = "home" }) { Text(tr("Home", "होम")) }
                     TextButton(onClick = { page = "history" }) { Text(tr("History", "इतिहास")) }
+                    TextButton(onClick = { page = "ai" }) { Text(tr("AI Check", "AI जाँच")) }
                 }
             }
         ) { pad ->
@@ -156,6 +158,7 @@ private fun OMRMate(context: Context) {
                     Button(onClick = { page = "home" }, modifier = Modifier.fillMaxWidth()) { Text(tr("Back to home", "होम पर जाएं")) }
                     OutlinedButton(onClick = { page = "create" }, modifier = Modifier.fillMaxWidth()) { Text(tr("New test", "नया टेस्ट")) }
                 }
+                "ai" -> AiProviderSettings()
                 else -> LazyColumn(Modifier.padding(pad).fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     item { Text(tr("Test history", "टेस्ट इतिहास"), color = Navy, fontSize = 27.sp, fontWeight = FontWeight.Bold) }
                     if (saved.isEmpty()) item { Text(tr("No saved tests yet.", "अभी कोई टेस्ट सेव नहीं है।"), color = Color.Gray) }
