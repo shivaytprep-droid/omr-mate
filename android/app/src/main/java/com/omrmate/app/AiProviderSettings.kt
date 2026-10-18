@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AiProviderSettings(onAnswerKeyPhoto: (Uri) -> Unit = {}) {
+fun AiProviderSettings(initialStudentAnswers: String = "", onAnswerKeyPhoto: (Uri) -> Unit = {}) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("omr_mate_settings", Context.MODE_PRIVATE) }
     var language by remember { mutableStateOf(prefs.getString("language", "English") ?: "English") }
@@ -25,7 +25,7 @@ fun AiProviderSettings(onAnswerKeyPhoto: (Uri) -> Unit = {}) {
     var apiKey by remember { mutableStateOf(prefs.getString("api_key", "") ?: "") }
     var expanded by remember { mutableStateOf(false) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
-    var studentAnswers by remember { mutableStateOf("") }
+    var studentAnswers by remember { mutableStateOf(initialStudentAnswers) }
     var result by remember { mutableStateOf("") }
     var checking by remember { mutableStateOf(false) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
