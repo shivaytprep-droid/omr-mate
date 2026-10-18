@@ -158,7 +158,7 @@ private fun OMRMate(context: Context) {
                     Button(onClick = { page = "home" }, modifier = Modifier.fillMaxWidth()) { Text(tr("Back to home", "होम पर जाएं")) }
                     OutlinedButton(onClick = { page = "create" }, modifier = Modifier.fillMaxWidth()) { Text(tr("New test", "नया टेस्ट")) }
                 }
-                "ai" -> AiProviderSettings()
+                "ai" -> AiProviderSettings(initialStudentAnswers = answers.mapIndexed { index, answer -> "${index + 1}-${answer.ifBlank { "blank" }}" }.joinToString(", "))
                 else -> LazyColumn(Modifier.padding(pad).fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     item { Text(tr("Test history", "टेस्ट इतिहास"), color = Navy, fontSize = 27.sp, fontWeight = FontWeight.Bold) }
                     if (saved.isEmpty()) item { Text(tr("No saved tests yet.", "अभी कोई टेस्ट सेव नहीं है।"), color = Color.Gray) }
