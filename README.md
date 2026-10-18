@@ -18,6 +18,7 @@ Create OMR sheets with A-D/A-E options, save responses locally, calculate scores
 - [UI/UX specification and wireframes](UI_UX_SPEC.md)
 - [Architecture and privacy](ARCHITECTURE_PRIVACY.md)
 - [Test plan](TEST_PLAN.md)
+- [Offline data and online ads policy](OFFLINE_ADS_PRIVACY_POLICY.md)
 
 ## Principles
 - Local-first IndexedDB storage; no account required.
