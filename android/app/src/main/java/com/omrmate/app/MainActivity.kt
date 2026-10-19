@@ -98,7 +98,7 @@ private fun OMRMate(context: Context) {
                         Column(Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(18.dp)).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("◎", color = Blue, fontSize = 36.sp)
                             Text(tr("No tests yet", "अभी कोई टेस्ट नहीं"), color = Navy, fontWeight = FontWeight.Bold)
-                            Text(tr("Your saved tests appear here.", "आपके सेव टेस्ट यहां दिखेंगे।"), color = Color.Gray)
+                            Text(tr("Your saved tests appear here.", "आपके सेव टेस्ट यहां दिखेंगे���"), color = Color.Gray)
                         }
                     }
                     items(saved.take(3)) { item -> SavedCard(item.first, item.second, hindi, { activeName = item.first; answers = item.second; count = item.second.size; page = "test" }) }
@@ -145,18 +145,37 @@ private fun OMRMate(context: Context) {
                         page = "result"
                     }, modifier = Modifier.fillMaxWidth().padding(14.dp).height(50.dp)) { Text(tr("Finish & save", "पूरा करें और सेव करें")) }
                 }
-                "result" -> Column(Modifier.padding(pad).fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(tr("Test summary", "टेस्ट सारांश"), color = Navy, fontSize = 27.sp, fontWeight = FontWeight.Bold)
-                    Column(Modifier.fillMaxWidth().background(Navy, RoundedCornerShape(24.dp)).padding(24.dp)) {
+                "result" -> LazyColumn(Modifier.padding(pad).fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { page = "home" }, modifier = Modifier.weight(1f)) { Text(tr("Back to Home", "होम पर जाएं")) }
+                        Button(onClick = { page = "create" }, modifier = Modifier.weight(1f)) { Text(tr("New Test", "नया टेस्ट")) }
+                    } }
+                    item { Text(tr("Test Summary", "टेस्ट सारांश"), color = Navy, fontSize = 27.sp, fontWeight = FontWeight.Bold) }
+                    item { Column(Modifier.fillMaxWidth().background(Navy, RoundedCornerShape(24.dp)).padding(22.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(summary?.first ?: activeName, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(16.dp))
                         Text(tr("Answered", "उत्तर भरे") + ": ${summary?.second?.count { it.isNotBlank() } ?: 0}", color = Color.White, fontSize = 18.sp)
-                        Text(tr("Blank", "खाली") + ": ${(summary?.second?.count { it.isBlank() } ?: 0)}", color = Color.White, fontSize = 18.sp)
+                        Text(tr("Blank", "खाली") + ": ${summary?.second?.count { it.isBlank() } ?: 0}", color = Color.White, fontSize = 18.sp)
                         Text(tr("Total", "कुल") + ": ${summary?.second?.size ?: 0}", color = Color.White, fontSize = 18.sp)
-                    }
-                    Text(tr("Scoring needs an answer key. This version saves your marked answers only.", "अंक निकालने के लिए उत्तर कुंजी चाहिए। यह संस्करण अभी आपके उत्तर सेव करता है।"), color = Color.Gray)
-                    Button(onClick = { page = "home" }, modifier = Modifier.fillMaxWidth()) { Text(tr("Back to home", "होम पर जाएं")) }
-                    OutlinedButton(onClick = { page = "create" }, modifier = Modifier.fillMaxWidth()) { Text(tr("New test", "नया टेस्ट")) }
+                    } }
+                    item { Column(Modifier.fillMaxWidth().background(Blue, RoundedCornerShape(22.dp)).clickable { page = "ai" }.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("AI CHECK  •  " + tr("AI Check", "AI से जाँचें"), color = Color.White, fontSize = 21.sp, fontWeight = FontWeight.Bold)
+                        Text(tr("1. Open AI Check.\n2. Set up your AI provider and API key.\n3. Select a clear answer-key photo.\n4. Analyze and review.", "1. AI जाँच खोलें।\n2. AI provider और API key सेट करें।\n3. उत्तर-कुंजी की साफ फोटो चुनें।\n4. जाँचकर परिणाम देखें।"), color = Color.White, fontSize = 13.sp)
+                    } }
+                    item { Column(Modifier.fillMaxWidth().background(Color(0xFF168653), RoundedCornerShape(22.dp)).clickable {
+                        val copyText = (summary?.second ?: answers).mapIndexed { index, answer -> "${index + 1}. ${answer.ifBlank { "-" }}" }.joinToString("\n")
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("OMR Answers", copyText))
+                        android.widget.Toast.makeText(context, tr("OMR answers copied", "OMR उत्तर कॉपी हो गए"), android.widget.Toast.LENGTH_SHORT).show()
+                        page = "home"
+                    }.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("COPY  •  " + tr("Copy Your OMR Sheet", "अपनी OMR शीट कॉपी करें"), color = Color.White, fontSize = 21.sp, fontWeight = FontWeight.Bold)
+                        Text(tr("1. Tap to copy your answers.\n2. Return home and use New Test.", "1. उत्तर कॉपी करने के लिए दबाएँ।\n2. होम पर लौटकर नया टेस्ट खोलें।"), color = Color.White, fontSize = 13.sp)
+                    } }
+                    item { Text(tr("Scoring needs an answer key. This version saves your marked answers only.", "अंक निकालने के लिए उत्तर कुंजी चाहिए। यह संस्करण अभी आपके उत्तर सेव करता है।"), color = Color.Gray, fontSize = 12.sp) }
+                    item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { page = "home" }, modifier = Modifier.weight(1f)) { Text(tr("Back to Home", "होम पर जाएं")) }
+                        Button(onClick = { page = "create" }, modifier = Modifier.weight(1f)) { Text(tr("New Test", "नया टेस्ट")) }
+                    } }
                 }
                 "ai" -> Box(Modifier.padding(pad).fillMaxSize()) { AiProviderSettings(initialStudentAnswers = answers.mapIndexed { index, answer -> "${index + 1}-${answer.ifBlank { "blank" }}" }.joinToString(", ")) }
                 else -> LazyColumn(Modifier.padding(pad).fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
