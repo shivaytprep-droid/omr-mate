@@ -50,7 +50,7 @@ private fun OMRMate(context: Context) {
         Scaffold(
             containerColor = Pale,
             topBar = {
-                Row(Modifier.fillMaxWidth().background(Color.White).padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.fillMaxWidth().background(Color.White).statusBarsPadding().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(42.dp).background(Navy, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) {
                         Text("OMR", color = Color.White, fontWeight = FontWeight.Black, fontSize = 13.sp)
                     }
@@ -66,7 +66,7 @@ private fun OMRMate(context: Context) {
                 }
             },
             bottomBar = {
-                if (page != "test") Row(Modifier.fillMaxWidth().background(Color.White).padding(8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+                if (page != "test") Row(Modifier.fillMaxWidth().background(Color.White).navigationBarsPadding().padding(8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
                     TextButton(onClick = { page = "home" }) { Text(tr("Home", "होम")) }
                     TextButton(onClick = { page = "history" }) { Text(tr("History", "इतिहास")) }
                     TextButton(onClick = { page = "ai" }) { Text(tr("AI Check", "AI जाँच")) }
